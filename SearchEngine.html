@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Engine</title>
+
+    <style>
+        .search-section {
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        #input-keyword,
+        #search-button {
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+            border-color: rgb(206, 180, 180);
+        }
+
+        .searched-images {
+            display: inline-flex;
+            flex-wrap: wrap;
+        }
+
+        .searched-images .single-image {
+            height: 25%;
+            width: 20%;
+            margin: 1%;
+            border: 0.5px solid black;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="search-section">
+        <h1>Image Search Engine</h1>
+
+        <input id="input-keyword" type="text" placeholder="Enter a keyword for images">
+        <button id="search-button" onclick="fetchImages()">Go Search</button>
+        <h3 id="search-info"></h3>
+   
+    </div>
+
+    <div class="image-section"></div>
+
+
+    <script>
+
+        fetchImages = async () => {
+
+            if (document.querySelector(".searched-images") != null) {
+
+                document.querySelector(".searched-images").remove()
+            }
+
+            let api_url = "http://www.splashbase.co/api/v1/images/search?query="
+
+            // get the input keyword to search for images
+            let input_keyword = document.getElementById("input-keyword").value
+            console.log(input_keyword)
+            if (input_keyword == "") {
+
+                document.getElementById("search-info").innerText = "Search filed is empty. Enter a keyword"
+
+            }
+            else {
+                // append the fetch url with the keyword
+                let fetch_url = api_url.concat(input_keyword)
+
+                // fetch images
+                let response = await fetch(fetch_url)
+                let got_images = await response.json()
+                console.log(got_images)
+
+                if (got_images.images.length == 0) {
+
+                    document.getElementById("search-info").innerText = "Could not find any related images for the given keyword"
+
+                } else {
+                    // populate the fetched images in the page
+                    if (document.querySelector(".searched-images") == null) {
+                        let searched_images = document.createElement("div")
+                        searched_images.classList.add("searched-images")
+                        document.querySelector(".image-section").appendChild(searched_images)
+                    }
+
+                    for (i = 0; i < got_images.images.length; i++) {
+
+                        let Single_image = document.createElement("img")
+                        Single_image.classList.add("single-image")
+                        Single_image.setAttribute("src", got_images.images[i].url)
+
+                        Single_image.addEventListener("click", (clickEvent) => {
+                            clickEvent.currentTarget.remove()
+
+                            if (document.querySelector(".searched-images").childElementCount == 0) {
+                                document.getElementById("search-info").innerText = "You removed all the images. Search again with keyword."
+                            }
+                        })
+
+                        document.querySelector(".searched-images").appendChild(Single_image)
+                        document.getElementById("search-info").innerText = "Here are the results.. click on the images to remove them.. "
+                    }
+                }
+            }
+
+        }
+
+    </script>
+
+</body>
+
+</html>
